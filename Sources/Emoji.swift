@@ -95,7 +95,7 @@ public let emojiList: [String: String] = [
   "imp": "👿",
   "skull": "💀",
   "skull_and_crossbones": "☠️",
-  "hankey": "💩",
+  "poop": "💩",
   "clown_face": "🤡",
   "japanese_ogre": "👹",
   "japanese_goblin": "👺",
