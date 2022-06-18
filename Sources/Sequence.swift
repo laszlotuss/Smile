@@ -22,6 +22,10 @@ public struct Sequence {
     public static let medium: String = "🏽"
     public static let mediumDark: String = "🏾"
     public static let dark: String = "🏿"
+
+    public static var all: [String] {
+      [SkinTone.light, SkinTone.mediumLight, SkinTone.medium, SkinTone.mediumDark, SkinTone.dark]
+    }
   }
 
   public struct Gender {
@@ -41,7 +45,6 @@ public struct Sequence {
   public static let all: [String] = [
     Mark.zeroWidthJoiner,
     Mark.presentationSelector,
-    Mark.enclosingKeyCap,
-    SkinTone.light, SkinTone.mediumLight, SkinTone.mediumLight, SkinTone.mediumDark, SkinTone.dark
-  ] + VariationSelector.all
+    Mark.enclosingKeyCap
+  ] + SkinTone.all + VariationSelector.all
 }
