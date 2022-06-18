@@ -5,7 +5,12 @@ class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = UIColor.white
+    
+    let label = UILabel(frame: view.bounds)
+    label.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+    label.text = category(emoji: "😀")?.description
+    label.numberOfLines = 0
+    view.addSubview(label)
   }
 }
 

@@ -221,7 +221,7 @@ public func replaceAlias(string: String) -> String {
 // MARK: - Category
 
 /// Determine the category of emoji
-public func category(emoji: String) -> String? {
+public func category(emoji: String) -> EmojiCategory? {
   for (category, list) in emojiCategories {
     if list.contains(emoji) {
       return category
