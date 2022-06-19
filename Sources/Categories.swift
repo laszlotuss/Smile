@@ -1,5 +1,11 @@
 public enum EmojiCategory: Int {
-case smileyAndEmotion, peopleAndBody, animalsAndNature, foodAndDrink, travelAndPlaces, activities, objects, symbols, flags
+case smileyAndEmotion, peopleAndBody, animalsAndNature, foodAndDrink, travelAndPlaces, activities, objects, symbols, flags, count
+}
+
+extension EmojiCategory {
+  public static var all: [EmojiCategory] {
+    Array(0..<EmojiCategory.count.rawValue).compactMap({ EmojiCategory(rawValue: $0) })
+  }
 }
 
 extension EmojiCategory: CustomStringConvertible {
@@ -14,6 +20,7 @@ extension EmojiCategory: CustomStringConvertible {
         case .objects: return "Objects"
         case .symbols: return "Symbols"
         case .flags: return "Flags"
+        case .count: return "Emoji Category Count"
         }
     }
 }
