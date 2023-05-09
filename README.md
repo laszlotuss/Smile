@@ -210,3 +210,7 @@ We would love you to contribute to **Smile**, check the [CONTRIBUTING](https://g
 ## License
 
 **Smile** is available under the MIT license. See the [LICENSE](https://github.com/onmyway133/Smile/blob/master/LICENSE.md) file for more info.
+
+## Apps Using Smile
+
+- [BIGOJI - Send Big Emoji Stickers on iMessage](https://apps.apple.com/app/apple-store/id1610956296?pt=118038397&ct=smile&mt=8)
