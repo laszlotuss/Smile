@@ -48,3 +48,14 @@ public struct Sequence {
     Mark.enclosingKeyCap
   ] + SkinTone.all + VariationSelector.all
 }
+
+public extension String {
+  /// Returns the emoji with the given Fitzpatrick skin-tone modifier appended when this
+  /// string is a single modifier-base emoji scalar; returns the receiver unchanged otherwise.
+  func applyingSkinTone(_ tone: String) -> String {
+    guard !tone.isEmpty,
+          unicodeScalars.count == 1,
+          unicodeScalars.first?.properties.isEmojiModifierBase == true else { return self }
+    return self + tone
+  }
+}
