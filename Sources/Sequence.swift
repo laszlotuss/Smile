@@ -54,8 +54,30 @@ public extension String {
   /// string is a single modifier-base emoji scalar; returns the receiver unchanged otherwise.
   func applyingSkinTone(_ tone: String) -> String {
     guard !tone.isEmpty,
-          unicodeScalars.count == 1,
-          unicodeScalars.first?.properties.isEmojiModifierBase == true else { return self }
-    return self + tone
+          let lead = unicodeScalars.first,
+          lead.properties.isEmojiModifierBase else { return self }
+    let tail = unicodeScalars.dropFirst()
+    switch tail.count {
+    case 0:
+      // Simple single-scalar modifier base — append tone.
+      return self + tone
+    case 1 where tail.first!.value == 0xFE0F:
+      // Modifier base + variation selector (e.g. ✌️ = U+270C U+FE0F).
+      // Drop the selector; the Fitzpatrick modifier takes its place.
+      return String(lead) + tone
+    default:
+      // ZWJ sequence (e.g. 🧑‍🦱 = U+1F9D1 ZWJ U+1F9B1).
+      // Skip an optional variation selector before the ZWJ, then insert tone.
+      let afterLead = tail.first!.value == 0xFE0F ? tail.dropFirst() : tail[...]
+      guard afterLead.first?.value == 0x200D else { return self }
+      return String(lead) + tone + afterLead.map { String($0) }.joined()
+    }
+  }
+
+  /// Returns the receiver with a trailing Fitzpatrick skin-tone modifier removed,
+  /// or the receiver unchanged if no modifier is present.
+  func strippingSkinTone() -> String {
+    guard let tone = Sequence.SkinTone.all.first(where: { hasSuffix($0) }) else { return self }
+    return String(dropLast(tone.count))
   }
 }
