@@ -142,10 +142,41 @@ Smile.replaceAlias(string: ":santa: is coming to :european_castle:") // 🎅 is 
 
 #### Find category of emoji
 
-Emoji data is from https://github.com/github/gemoji/blob/master/db/Category-Emoji.json
+Categories follow the groups and order of Unicode's [emoji-test.txt](https://unicode.org/Public/emoji/latest/emoji-test.txt).
 
 ```swift
-Smile.category(emoji: "😁") // people
+Smile.category(emoji: "😁") // .smileyAndEmotion
+```
+
+### Version
+
+#### Find the Emoji version that added an emoji
+
+```swift
+Smile.version(emoji: "🫩")   // 16.0
+Smile.version(emoji: "🙂‍↔️") // 15.1
+Smile.version(emoji: "👯🏿")  // 17.0, toned forms can be newer than their base (👯 is 0.6)
+Smile.emojiDataVersion       // 18.0, the version of the bundled data
+```
+
+#### Newest Emoji version the system emoji font can draw
+
+```swift
+Smile.systemEmojiVersion // 16.0 on iOS 18.4 – 26.3, 17.0 from iOS 26.4
+```
+
+### Skin tone
+
+#### Apply or remove a skin tone
+
+Variants come from Unicode's data, so multi-person emoji tone both people and families stay unchanged.
+
+```swift
+"👋".applyingSkinTone(Smile.Sequence.SkinTone.dark)       // 👋🏿
+"🧑‍🤝‍🧑".applyingSkinTone(Smile.Sequence.SkinTone.dark)   // 🧑🏿‍🤝‍🧑🏿
+"👨‍👩‍👧".applyingSkinTone(Smile.Sequence.SkinTone.dark)   // 👨‍👩‍👧, no toned form
+"✌🏿".strippingSkinTone()                                  // ✌️
+Smile.skinToneVariants(emoji: "👍")                         // [👍🏻, 👍🏼, 👍🏽, 👍🏾, 👍🏿]
 ```
 
 ### Manipulation
@@ -177,11 +208,13 @@ Smile.disassemble(emoji: "👨‍🏫") // [👨, 🏫]
 
 ## Script
 
-Update emoji list by running
+The emoji data in `Sources/EmojiData.swift` and `Sources/Emoji.swift` is generated. To update to a new Emoji version, replace `Script/Data/emoji-test.txt` with the [latest emoji-test.txt](https://unicode.org/Public/emoji/latest/emoji-test.txt), then run this from the repository root:
 
-```js
-node parser.js
+```sh
+swift Script/Generate.swift
 ```
+
+Aliases come from `Script/Data/gemoji-aliases.tsv` ([gemoji](https://github.com/github/gemoji)). Emoji without a gemoji alias get one made from their Unicode name, like `face_with_bags_under_eyes`.
 
 ## Installation
 
