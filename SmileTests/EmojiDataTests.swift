@@ -36,9 +36,32 @@ final class EmojiDataTests: XCTestCase {
     XCTAssertEqual(Smile.emojiDataVersion, 18.0)
   }
 
+  func testEmojisByVersion() {
+    XCTAssertEqual(Smile.emojiVersions.first, 0.6)
+    XCTAssertEqual(Smile.emojiVersions.last, Smile.emojiDataVersion)
+    XCTAssertEqual(Smile.emojiVersions, Smile.emojiVersions.sorted())
+    XCTAssertFalse(Smile.emojiVersions.contains(6.0), "Emoji versions jump from 5.0 to 11.0")
+
+    let emoji16 = Smile.emojis(version: 16.0)
+    XCTAssertEqual(emoji16.count, 8)
+    XCTAssertEqual(emoji16.first, "\u{1FAE9}") // 🫩, Unicode order
+    XCTAssertTrue(Smile.emojis(version: 15.0).contains("\u{1FAF8}\u{1F3FB}")) // 🫸🏻 arrived with 🫸
+    XCTAssertTrue(Smile.emojis(version: 17.0).contains("\u{1F46F}\u{1F3FF}")) // 👯🏿, a newer tone on 👯
+    XCTAssertEqual(Smile.emojis(version: 15.2), [])
+
+    for version in Smile.emojiVersions {
+      XCTAssertTrue(Smile.emojis(version: version).allSatisfy { Smile.version(emoji: $0) == version })
+    }
+  }
+
   func testSystemEmojiVersion() {
     XCTAssertGreaterThanOrEqual(Smile.systemEmojiVersion, 12.1)
     XCTAssertLessThanOrEqual(Smile.systemEmojiVersion, Smile.emojiDataVersion)
+
+    let releases = Smile.appleEmojiReleases.map { $0.emojiVersion }
+    XCTAssertEqual(releases, releases.sorted())
+    XCTAssertTrue(releases.allSatisfy { Smile.emojiVersions.contains($0) })
+    XCTAssertTrue(releases.contains(Smile.systemEmojiVersion) || Smile.systemEmojiVersion < releases[0])
   }
 
   func testSkinToneVariants() {

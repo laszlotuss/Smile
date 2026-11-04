@@ -159,10 +159,18 @@ Smile.version(emoji: "👯🏿")  // 17.0, toned forms can be newer than their b
 Smile.emojiDataVersion       // 18.0, the version of the bundled data
 ```
 
+#### List the emojis an Emoji version added
+
+```swift
+Smile.emojis(version: 16.0) // [🫩, 🫆, 🪾, 🫜, 🪉, 🪏, 🫟, 🇨🇶]
+Smile.emojiVersions         // [0.6, 0.7, 1.0, 2.0, 3.0, 4.0, 5.0, 11.0 … 18.0]
+```
+
 #### Newest Emoji version the system emoji font can draw
 
 ```swift
 Smile.systemEmojiVersion // 16.0 on iOS 18.4 – 26.3, 17.0 from iOS 26.4
+Smile.appleEmojiReleases // [("14.2", 13.0) … ("18.4", 16.0), ("26.4", 17.0)], the iOS release of each set
 ```
 
 ### Skin tone
