@@ -62,7 +62,7 @@ class Tests: XCTestCase {
   }
 
   func testCategory() {
-    XCTAssertEqual(Smile.category(emoji: "😁"), "Smileys & Emotion")
+    XCTAssertEqual(Smile.category(emoji: "😁"), .smileyAndEmotion)
   }
 
   func testAlias() {
