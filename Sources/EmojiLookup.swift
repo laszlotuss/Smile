@@ -32,6 +32,24 @@ public func emojis(version: Double) -> [String] {
   EmojiTables.emojisByVersion[version] ?? []
 }
 
+/// The Unicode version that Emoji `version` is based on, or nil for an unknown version.
+///
+/// Before 11.0, Emoji versions had their own numbering: Emoji 3.0 is Unicode 9.0, and the
+/// sequence-only Emoji 2.0 and 4.0 reuse Unicode 8.0 and 9.0. From 11.0 on they match, except
+/// Emoji 13.1, which added sequences on top of Unicode 13.0.
+public func unicodeVersion(emojiVersion version: Double) -> Double? {
+  guard EmojiTables.emojisByVersion[version] != nil else { return nil }
+  switch version {
+  case 0.6: return 6.0
+  case 0.7: return 7.0
+  case 1.0, 2.0: return 8.0
+  case 3.0, 4.0: return 9.0
+  case 5.0: return 10.0
+  case 13.1: return 13.0
+  default: return version
+  }
+}
+
 /// The iOS release that added each Emoji version to Apple Color Emoji, oldest first.
 ///
 /// Matches `systemEmojiVersion`; update both when a new set ships.

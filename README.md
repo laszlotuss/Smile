@@ -166,6 +166,16 @@ Smile.emojis(version: 16.0) // [🫩, 🫆, 🪾, 🫜, 🪉, 🪏, 🫟, 🇨�
 Smile.emojiVersions         // [0.6, 0.7, 1.0, 2.0, 3.0, 4.0, 5.0, 11.0 … 18.0]
 ```
 
+#### Find the Unicode version an Emoji version is based on
+
+Emoji versions only follow Unicode's from 11.0 on.
+
+```swift
+Smile.unicodeVersion(emojiVersion: 3.0)  // 9.0
+Smile.unicodeVersion(emojiVersion: 13.1) // 13.0, 13.1 only added sequences
+Smile.unicodeVersion(emojiVersion: 16.0) // 16.0
+```
+
 #### Newest Emoji version the system emoji font can draw
 
 ```swift

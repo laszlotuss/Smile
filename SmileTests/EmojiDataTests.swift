@@ -54,6 +54,28 @@ final class EmojiDataTests: XCTestCase {
     }
   }
 
+  func testUnicodeVersion() {
+    XCTAssertEqual(Smile.unicodeVersion(emojiVersion: 0.6), 6.0)
+    XCTAssertEqual(Smile.unicodeVersion(emojiVersion: 2.0), 8.0)
+    XCTAssertEqual(Smile.unicodeVersion(emojiVersion: 3.0), 9.0)
+    XCTAssertEqual(Smile.unicodeVersion(emojiVersion: 5.0), 10.0)
+    XCTAssertEqual(Smile.unicodeVersion(emojiVersion: 13.1), 13.0)
+    XCTAssertEqual(Smile.unicodeVersion(emojiVersion: 15.1), 15.1)
+    XCTAssertEqual(Smile.unicodeVersion(emojiVersion: 16.0), 16.0)
+    XCTAssertNil(Smile.unicodeVersion(emojiVersion: 9.0), "Emoji 9.0 doesn't exist")
+
+    // No emoji uses a character newer than its Emoji version's Unicode base.
+    for version in Smile.emojiVersions {
+      guard let unicode = Smile.unicodeVersion(emojiVersion: version) else { return XCTFail("\(version)") }
+      for emoji in Smile.emojis(version: version) {
+        for scalar in emoji.unicodeScalars {
+          guard let age = scalar.properties.age else { continue } // newer than the OS's Unicode data
+          XCTAssertLessThanOrEqual(Double(age.major) + Double(age.minor) / 10, unicode, "\(emoji) in Emoji \(version)")
+        }
+      }
+    }
+  }
+
   func testSystemEmojiVersion() {
     XCTAssertGreaterThanOrEqual(Smile.systemEmojiVersion, 12.1)
     XCTAssertLessThanOrEqual(Smile.systemEmojiVersion, Smile.emojiDataVersion)
