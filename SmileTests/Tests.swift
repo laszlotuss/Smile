@@ -108,6 +108,50 @@ class Tests: XCTestCase {
     XCTAssertEqual(Smile.disassemble(emoji: "👨‍✈"), ["👨"])
   }
 
+  func testApplyingSkinToneToOnePerson() {
+    let dark = Smile.Sequence.SkinTone.dark
+    XCTAssertEqual("\u{1F44B}".applyingSkinTone(dark), "\u{1F44B}\u{1F3FF}") // 👋
+    XCTAssertEqual("\u{270C}\u{FE0F}".applyingSkinTone(dark), "\u{270C}\u{1F3FF}") // ✌️
+    XCTAssertEqual("\u{1F469}\u{200D}\u{2695}\u{FE0F}".applyingSkinTone(dark),
+                   "\u{1F469}\u{1F3FF}\u{200D}\u{2695}\u{FE0F}") // 👩‍⚕️
+    XCTAssertEqual("\u{1F3CC}\u{FE0F}\u{200D}\u{2642}\u{FE0F}".applyingSkinTone(dark),
+                   "\u{1F3CC}\u{1F3FF}\u{200D}\u{2642}\u{FE0F}") // 🏌️‍♂️
+    XCTAssertEqual("\u{1F3C3}\u{200D}\u{2640}\u{FE0F}\u{200D}\u{27A1}\u{FE0F}".applyingSkinTone(dark),
+                   "\u{1F3C3}\u{1F3FF}\u{200D}\u{2640}\u{FE0F}\u{200D}\u{27A1}\u{FE0F}") // 🏃‍♀️‍➡️
+    XCTAssertEqual("\u{1F9D1}\u{200D}\u{1F9AF}\u{200D}\u{27A1}\u{FE0F}".applyingSkinTone(dark),
+                   "\u{1F9D1}\u{1F3FF}\u{200D}\u{1F9AF}\u{200D}\u{27A1}\u{FE0F}") // 🧑‍🦯‍➡️
+    XCTAssertEqual("\u{1F91D}".applyingSkinTone(dark), "\u{1F91D}\u{1F3FF}") // 🤝
+    XCTAssertEqual("\u{1F46B}".applyingSkinTone(dark), "\u{1F46B}\u{1F3FF}") // 👫
+  }
+
+  func testApplyingSkinToneToTwoPeople() {
+    let dark = Smile.Sequence.SkinTone.dark
+    XCTAssertEqual("\u{1F9D1}\u{200D}\u{1F91D}\u{200D}\u{1F9D1}".applyingSkinTone(dark),
+                   "\u{1F9D1}\u{1F3FF}\u{200D}\u{1F91D}\u{200D}\u{1F9D1}\u{1F3FF}") // 🧑‍🤝‍🧑
+    XCTAssertEqual("\u{1F469}\u{200D}\u{2764}\u{FE0F}\u{200D}\u{1F468}".applyingSkinTone(dark),
+                   "\u{1F469}\u{1F3FF}\u{200D}\u{2764}\u{FE0F}\u{200D}\u{1F468}\u{1F3FF}") // 👩‍❤️‍👨
+    XCTAssertEqual("\u{1F469}\u{200D}\u{2764}\u{FE0F}\u{200D}\u{1F48B}\u{200D}\u{1F468}".applyingSkinTone(dark),
+                   "\u{1F469}\u{1F3FF}\u{200D}\u{2764}\u{FE0F}\u{200D}\u{1F48B}\u{200D}\u{1F468}\u{1F3FF}") // 👩‍❤️‍💋‍👨
+  }
+
+  func testApplyingSkinToneLeavesUntonableEmojis() {
+    let dark = Smile.Sequence.SkinTone.dark
+    let unchanged = [
+      "\u{1F468}\u{200D}\u{1F466}", // 👨‍👦
+      "\u{1F468}\u{200D}\u{1F468}\u{200D}\u{1F466}", // 👨‍👨‍👦
+      "\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466}", // 👨‍👩‍👧‍👦
+      "\u{1F9D1}\u{200D}\u{1F9D1}\u{200D}\u{1F9D2}", // 🧑‍🧑‍🧒
+      "\u{1F46A}", // 👪
+      "\u{1F600}", // 😀
+      "\u{1F3F3}\u{FE0F}\u{200D}\u{1F308}", // 🏳️‍🌈
+      "\u{1F441}\u{FE0F}\u{200D}\u{1F5E8}\u{FE0F}", // 👁️‍🗨️
+      "\u{1F44B}\u{1F3FD}", // 👋🏽, already toned
+    ]
+    unchanged.forEach { XCTAssertEqual($0.applyingSkinTone(dark), $0) }
+    XCTAssertEqual("\u{1F44B}".applyingSkinTone(""), "\u{1F44B}")
+    XCTAssertEqual("\u{1F44B}".applyingSkinTone("a"), "\u{1F44B}")
+  }
+
   func testVariationSelectors() {
     // emojis from iOS, macOS, Chrome has different variation selectors
     XCTAssertNotEqual("👨‍✈️", "👨‍✈")
