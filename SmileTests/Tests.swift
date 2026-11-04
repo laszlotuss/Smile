@@ -145,9 +145,9 @@ class Tests: XCTestCase {
       "\u{1F600}", // 😀
       "\u{1F3F3}\u{FE0F}\u{200D}\u{1F308}", // 🏳️‍🌈
       "\u{1F441}\u{FE0F}\u{200D}\u{1F5E8}\u{FE0F}", // 👁️‍🗨️
-      "\u{1F44B}\u{1F3FD}", // 👋🏽, already toned
     ]
     unchanged.forEach { XCTAssertEqual($0.applyingSkinTone(dark), $0) }
+    XCTAssertEqual("\u{1F44B}\u{1F3FD}".applyingSkinTone(dark), "\u{1F44B}\u{1F3FF}") // 👋🏽 → 👋🏿
     XCTAssertEqual("\u{1F44B}".applyingSkinTone(""), "\u{1F44B}")
     XCTAssertEqual("\u{1F44B}".applyingSkinTone("a"), "\u{1F44B}")
   }

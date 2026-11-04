@@ -50,51 +50,28 @@ public struct Sequence {
 }
 
 public extension String {
-  /// Returns the emoji with the given Fitzpatrick skin-tone modifier applied the way the RGI
-  /// emoji sets define toned sequences; returns the receiver unchanged when it has no toned form.
+  /// The emoji in the given skin tone (one of `Sequence.SkinTone.all`), from Unicode's
+  /// emoji-test.txt; the receiver unchanged when it has no toned form or `tone` isn't one.
   ///
-  /// - One person (👋, ✌️, 👩‍⚕️, 🏃‍♀️‍➡️): the tone follows the lead person.
-  /// - Two people joined by a connector (🧑‍🤝‍🧑, 👩‍❤️‍👨, 👩‍❤️‍💋‍👨): both people get the tone.
-  /// - Families (👨‍👦, 👨‍👩‍👧, 🧑‍🧑‍🧒) have no toned forms. Toning only some members
-  ///   breaks the sequence into separate glyphs, so they are returned unchanged.
+  /// - One person (👋, ✌️, 👩‍⚕️, 🏃‍♀️‍➡️): the tone follows the person.
+  /// - Two people (🧑‍🤝‍🧑, 👩‍❤️‍👨, 👩‍❤️‍💋‍👨): both people get the tone.
+  /// - Families (👨‍👦, 👨‍👩‍👧, 🧑‍🧑‍🧒) have no toned forms, so they stay unchanged.
+  /// - An already toned emoji switches to the new tone (👋🏽 → 👋🏿).
+  ///
+  /// Some toned forms are newer than their base (👯 is 0.6, 👯🏿 is 17.0), so check
+  /// `Smile.version(emoji:)` of the result against what the font can draw.
   func applyingSkinTone(_ tone: String) -> String {
-    guard let toneScalar = tone.unicodeScalars.first,
-          tone.unicodeScalars.count == 1,
-          toneScalar.properties.isEmojiModifier,
-          !unicodeScalars.contains(where: { $0.properties.isEmojiModifier }) else { return self }
-
-    let joiner: Unicode.Scalar = "\u{200D}"
-    let components = unicodeScalars.split(separator: joiner, omittingEmptySubsequences: false)
-    // 🤝 is a modifier base on its own, but stays untoned between two people (🧑🏿‍🤝‍🧑🏿).
-    // 👪 is a modifier base in newer Unicode data, but has no toned RGI form.
-    let people = components.indices.filter { index in
-      guard let base = components[index].first,
-            base.properties.isEmojiModifierBase,
-            base.value != 0x1F46A else { return false }
-      return components.count == 1 || base.value != 0x1F91D
-    }
-    guard people.first == 0,
-          people.count == 1 || (people.count == 2 && components.count > 2) else { return self }
-
-    var toned = String.UnicodeScalarView()
-    for (index, component) in components.enumerated() {
-      if index > 0 { toned.append(joiner) }
-      guard people.contains(index), let base = component.first else {
-        toned.append(contentsOf: component)
-        continue
-      }
-      // The modifier replaces the emoji presentation selector (✌️ → ✌🏿, 🏌️‍♂️ → 🏌🏿‍♂️).
-      toned.append(base)
-      toned.append(toneScalar)
-      toned.append(contentsOf: component.dropFirst().filter { $0.value != 0xFE0F })
-    }
-    return String(toned)
+    guard let index = Sequence.SkinTone.all.firstIndex(of: tone) else { return self }
+    let variants = Smile.skinToneVariants(emoji: self)
+    return variants.isEmpty ? self : variants[index]
   }
 
-  /// Returns the receiver with a trailing Fitzpatrick skin-tone modifier removed,
-  /// or the receiver unchanged if no modifier is present.
+  /// The emoji without skin tone modifiers, in its fully-qualified form
+  /// (✌🏿 → ✌️, 🧑🏻‍🤝‍🧑🏼 → 🧑‍🤝‍🧑); the receiver unchanged when it has no modifier.
   func strippingSkinTone() -> String {
-    guard let tone = Sequence.SkinTone.all.first(where: { hasSuffix($0) }) else { return self }
-    return String(dropLast(tone.count))
+    let scalars = unicodeScalars.filter { !(0x1F3FB...0x1F3FF).contains($0.value) }
+    guard scalars.count != unicodeScalars.count else { return self }
+    let untoned = String(String.UnicodeScalarView(scalars))
+    return EmojiTables.fullyQualifiedByKey[untoned.smile_lookupKey] ?? untoned
   }
 }

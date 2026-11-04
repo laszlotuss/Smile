@@ -1,0 +1,75 @@
+//
+//  EmojiDataTests.swift
+//  Smile
+//
+
+import XCTest
+import Smile
+
+final class EmojiDataTests: XCTestCase {
+
+  func testCategoriesFollowUnicode() {
+    let all = EmojiCategory.allCases.flatMap { Smile.emojiCategories[$0] ?? [] }
+    XCTAssertEqual(Smile.emojiCategories.count, EmojiCategory.allCases.count)
+    XCTAssertEqual(Smile.emojiCategories[.smileyAndEmotion]?.first, "\u{1F600}") // 😀
+    XCTAssertEqual(Set(all).count, all.count, "Every emoji belongs to one category once")
+    XCTAssertTrue(all.allSatisfy { Smile.version(emoji: $0) != nil })
+    XCTAssertFalse(all.contains { $0.unicodeScalars.contains { (0x1F3FB...0x1F3FF).contains($0.value) } },
+                   "Categories hold untoned emoji only")
+    XCTAssertTrue(all.contains("\u{1F642}\u{200D}\u{2194}\u{FE0F}")) // 🙂‍↔️ 15.1
+    XCTAssertTrue(all.contains("\u{1FAE9}")) // 🫩 16.0
+    XCTAssertTrue(all.contains("\u{1FAEA}")) // 🫪 17.0
+  }
+
+  func testVersion() {
+    XCTAssertEqual(Smile.version(emoji: "\u{1F600}"), 1.0) // 😀
+    XCTAssertEqual(Smile.version(emoji: "\u{263A}\u{FE0F}"), 0.6) // ☺️
+    XCTAssertEqual(Smile.version(emoji: "\u{263A}"), 0.6) // ☺ without a variation selector
+    XCTAssertEqual(Smile.version(emoji: "\u{1F642}\u{200D}\u{2194}\u{FE0F}"), 15.1) // 🙂‍↔️
+    XCTAssertEqual(Smile.version(emoji: "\u{1F9D1}\u{200D}\u{1F9D1}\u{200D}\u{1F9D2}"), 15.1) // 🧑‍🧑‍🧒
+    XCTAssertEqual(Smile.version(emoji: "\u{1FAE9}"), 16.0) // 🫩
+    XCTAssertEqual(Smile.version(emoji: "\u{1F46F}"), 0.6) // 👯
+    XCTAssertEqual(Smile.version(emoji: "\u{1F46F}\u{1F3FF}"), 17.0) // 👯🏿
+    XCTAssertEqual(Smile.version(emoji: "\u{1F469}\u{1F3FF}\u{200D}\u{2764}\u{FE0F}\u{200D}\u{1F468}\u{1F3FF}"), 13.1) // 👩🏿‍❤️‍👨🏿
+    XCTAssertNil(Smile.version(emoji: "a"))
+    XCTAssertNil(Smile.version(emoji: "\u{1F468}\u{1F3FF}\u{200D}\u{1F468}\u{200D}\u{1F466}")) // 👨🏿‍👨‍👦 isn't an emoji
+    XCTAssertEqual(Smile.emojiDataVersion, 18.0)
+  }
+
+  func testSystemEmojiVersion() {
+    XCTAssertGreaterThanOrEqual(Smile.systemEmojiVersion, 12.1)
+    XCTAssertLessThanOrEqual(Smile.systemEmojiVersion, Smile.emojiDataVersion)
+  }
+
+  func testSkinToneVariants() {
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F44B}"), Smile.Sequence.SkinTone.all.map { "\u{1F44B}" + $0 }) // 👋
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F44B}\u{1F3FD}"), Smile.skinToneVariants(emoji: "\u{1F44B}"))
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F46F}").last, "\u{1F46F}\u{1F3FF}") // 👯 → 👯🏿
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F9D1}\u{200D}\u{1F91D}\u{200D}\u{1F9D1}").last,
+                   "\u{1F9D1}\u{1F3FF}\u{200D}\u{1F91D}\u{200D}\u{1F9D1}\u{1F3FF}") // 🧑‍🤝‍🧑
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F468}\u{200D}\u{1F468}\u{200D}\u{1F466}"), []) // 👨‍👨‍👦
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F9D1}\u{200D}\u{1F9D1}\u{200D}\u{1F9D2}"), []) // 🧑‍🧑‍🧒
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F46A}"), []) // 👪
+    XCTAssertEqual(Smile.skinToneVariants(emoji: "\u{1F600}"), []) // 😀
+  }
+
+  func testStrippingSkinTone() {
+    XCTAssertEqual("\u{1F44B}\u{1F3FF}".strippingSkinTone(), "\u{1F44B}") // 👋🏿
+    XCTAssertEqual("\u{270C}\u{1F3FF}".strippingSkinTone(), "\u{270C}\u{FE0F}") // ✌🏿 → ✌️
+    XCTAssertEqual("\u{1F3CC}\u{1F3FF}\u{200D}\u{2642}\u{FE0F}".strippingSkinTone(),
+                   "\u{1F3CC}\u{FE0F}\u{200D}\u{2642}\u{FE0F}") // 🏌🏿‍♂️ → 🏌️‍♂️
+    XCTAssertEqual("\u{1F9D1}\u{1F3FB}\u{200D}\u{1F91D}\u{200D}\u{1F9D1}\u{1F3FC}".strippingSkinTone(),
+                   "\u{1F9D1}\u{200D}\u{1F91D}\u{200D}\u{1F9D1}") // 🧑🏻‍🤝‍🧑🏼 → 🧑‍🤝‍🧑
+    XCTAssertEqual("\u{1F600}".strippingSkinTone(), "\u{1F600}")
+  }
+
+  func testAliasesCoverEveryEmoji() {
+    let aliased = Set(Smile.emojiList.values.map { $0.unicodeScalars.filter { $0.value != 0xFE0F }.map { $0.value } })
+    let all = EmojiCategory.allCases.flatMap { Smile.emojiCategories[$0] ?? [] }
+    let missing = all.filter { !aliased.contains($0.unicodeScalars.filter { $0.value != 0xFE0F }.map { $0.value }) }
+    XCTAssertEqual(missing, [])
+    XCTAssertEqual(Smile.emoji(alias: "face_with_bags_under_eyes"), "\u{1FAE9}") // 🫩
+    XCTAssertEqual(Smile.emoji(alias: "japanese_castle"), "\u{1F3EF}") // 🏯
+    XCTAssertTrue(Smile.emojiList.keys.allSatisfy { $0.range(of: "^[a-z0-9_+-]+$", options: .regularExpression) != nil })
+  }
+}
